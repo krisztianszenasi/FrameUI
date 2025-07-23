@@ -71,12 +71,25 @@ public enum StackAlignment {
 ///
 /// The `view` is the actual UIView to be arranged according to the rules
 /// defined by its associated enums (e.g., alignment and sizing).
-public struct StackElement {    
+@MainActor
+public struct StackElement {
     public var view: UIView
-    public var alignment: StackAlignment = .center
-    public var mainSize: StackElementSize = .weighted(size: 1)
-    public var crosSize: StackElementSize = .relative(size: 1)
+    public var alignment: StackAlignment
+    public var mainSize: StackElementSize
+    public var crosSize: StackElementSize
     
+    public init(
+        view: UIView,
+        alignment: StackAlignment = .center,
+        mainSize: StackElementSize = .weighted(size: 1),
+        crosSize: StackElementSize = .relative(size: 1)
+    ) {
+        self.view = view
+        self.alignment = alignment
+        self.mainSize = mainSize
+        self.crosSize = crosSize
+    }
+
     public static func makeFiller() -> StackElement {
         return StackElement(view: UIView())
     }
@@ -96,6 +109,7 @@ public struct StackElement {
 /// Arranges a list of views horizontally or vertically with customizable options.
 ///
 /// See `StackElement` and its related enums for details on available configuration options.
+@MainActor
 public struct StackLayout {
 
     public static func layoutStackedSubviews(
