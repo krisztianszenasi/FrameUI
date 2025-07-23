@@ -199,6 +199,46 @@ public struct StackLayout {
             element.view.frame = CGRect(x: x, y: y, width: width, height: height)
         }
     }
+    
+    /// Computes the ideal size needed to fit the given elements.
+    ///
+    /// Recommended usage: first call this method to calculate the fitting size,
+    /// then set the parent’s `mainSize` and `crosSize` to `.copy`,
+    /// and finally apply the returned size to the parent’s frame.
+    public static func calculateFittingSize(
+        for elements: [StackElement],
+        direction: StackDirection
+    ) -> CGSize {
+        var totalMain: CGFloat = 0
+        var maxCross: CGFloat = 0
+
+        for element in elements {
+            let (main, cross): (CGFloat, CGFloat)
+
+            switch element.mainSize {
+            case .fixed(let size): main = size
+            case .weighted: main = 0 // you don’t know until the parent is known
+            case ._relative(let ratio, _): main = 0 // again, needs parent
+            case .copy:
+                main = (direction == .vertical) ? element.view.frame.height : element.view.frame.width
+            }
+
+            switch element.crosSize {
+            case .fixed(let size): cross = size
+            case .weighted: cross = 0
+            case ._relative: cross = 0
+            case .copy:
+                cross = (direction == .vertical) ? element.view.frame.width : element.view.frame.height
+            }
+
+            totalMain += main
+            maxCross = max(maxCross, cross)
+        }
+
+        return (direction == .vertical)
+            ? CGSize(width: maxCross, height: totalMain)
+            : CGSize(width: totalMain, height: maxCross)
+    }
 
     private static func calculateOffset(alignment: StackAlignment, childSize: CGFloat, parentSize: CGFloat) -> CGFloat {
         switch alignment {
