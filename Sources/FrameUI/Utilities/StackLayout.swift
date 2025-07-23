@@ -171,7 +171,6 @@ public struct StackLayout {
             }
 
             element.view.frame = CGRect(x: x, y: y, width: width, height: height)
-            parent.addSubview(element.view)
         }
     }
 
