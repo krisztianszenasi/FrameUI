@@ -14,7 +14,7 @@ public extension Array {
     ///
     /// Example: `[1,1].insertBetween(2)`
     /// Result: `[1,2,1]`
-    public func insertBetween(_ createNewElement: () -> Element) -> [Element] {
+    func insertBetween(_ createNewElement: () -> Element) -> [Element] {
         guard !isEmpty else { return [] }
         return self.enumerated().flatMap { index, element in
             index < self.count - 1 ? [element, createNewElement()] : [element]
@@ -25,7 +25,7 @@ public extension Array {
     ///
     /// Example: `[1,1].insertAround(2)`
     /// Result: `[2,1,2,2,1,2]`
-    public func insertArround(_ createNewElement: () -> Element) -> [Element] {
+    func insertArround(_ createNewElement: () -> Element) -> [Element] {
         guard !isEmpty else { return [] }
         return flatMap { [createNewElement(), $0, createNewElement()] }
     }
@@ -34,7 +34,7 @@ public extension Array {
     ///
     /// Example: `[1,1].insertEvenly(2)`
     /// Result: `[2,1,2,1,2]`
-    public func insertEvenly(_ createNewElement: () -> Element) -> [Element] {
+    func insertEvenly(_ createNewElement: () -> Element) -> [Element] {
         isEmpty ? [] : flatMap { [createNewElement(), $0] } + [createNewElement()]
     }
 }
