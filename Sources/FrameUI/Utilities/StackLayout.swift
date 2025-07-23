@@ -11,7 +11,7 @@ import UIKit
 ///
 /// Used by `StackLayout` to define whether elements are arranged
 /// horizontally or vertically.
-enum StackDirection {
+public enum StackDirection {
     case vertical
     case horizontal
 }
@@ -25,7 +25,7 @@ enum StackDirection {
 /// arrangement patterns from Jetpack Compose on Android.
 /// For a conceptual reference, see the Jetpack Compose documentation:
 /// https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/Arrangement
-enum StackArrangement {
+public enum StackArrangement {
     case start
     case center
     case end
@@ -42,7 +42,7 @@ enum StackArrangement {
 ///   (width for horizontal stacks, height for vertical). By default, all elements share equal weight.
 ///   The `crossAxisRatio` controls the size on the cross axis (height for horizontal, width for vertical),
 ///   where `1` means full size and, for example, `0.5` means half the available space.
-enum StackElementSize {
+public enum StackElementSize {
     case fixed(size: CGFloat)
     case weighted(size: CGFloat)
     case relative(size: CGFloat)
@@ -60,7 +60,7 @@ enum StackElementSize {
 /// - `start` aligns to the left,
 /// - `center` aligns to the center,
 /// - `end` aligns to the right.
-enum StackAlignment {
+public enum StackAlignment {
     case start
     case center
     case end
@@ -71,21 +71,21 @@ enum StackAlignment {
 ///
 /// The `view` is the actual UIView to be arranged according to the rules
 /// defined by its associated enums (e.g., alignment and sizing).
-struct StackElement {    
-    var view: UIView
-    var alignment: StackAlignment = .center
-    var mainSize: StackElementSize = .weighted(size: 1)
-    var crosSize: StackElementSize = .relative(size: 1)
+public struct StackElement {    
+    public var view: UIView
+    public var alignment: StackAlignment = .center
+    public var mainSize: StackElementSize = .weighted(size: 1)
+    public var crosSize: StackElementSize = .relative(size: 1)
     
-    static func makeFiller() -> StackElement {
+    public static func makeFiller() -> StackElement {
         return StackElement(view: UIView())
     }
     
-    static func makeGap(mainLength: CGFloat = 0, crossLength: CGFloat = 0) -> StackElement {
+    public static func makeGap(mainLength: CGFloat = 0, crossLength: CGFloat = 0) -> StackElement {
         return StackElement(view: UIView(), mainSize: .fixed(size: mainLength), crosSize: .fixed(size: crossLength))
     }
     
-    static func makeSeparator(color: UIColor = .systemGray) -> StackElement {
+    public static func makeSeparator(color: UIColor = .systemGray) -> StackElement {
         let seperator = UIView()
         seperator.backgroundColor = color
         return StackElement(view: seperator, mainSize: .fixed(size: 1))
@@ -96,9 +96,9 @@ struct StackElement {
 /// Arranges a list of views horizontally or vertically with customizable options.
 ///
 /// See `StackElement` and its related enums for details on available configuration options.
-struct StackLayout {
+public struct StackLayout {
 
-    static func layoutStackedSubviews(
+    public static func layoutStackedSubviews(
         elements: [StackElement],
         in parent: UIView,
         direction: StackDirection,
