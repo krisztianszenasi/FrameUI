@@ -37,15 +37,20 @@ public enum StackArrangement {
 
 /// Defines how an element should be sized within the stack layout.
 ///
-/// - `fixed`: Uses fixed width and height values.
-/// - `relative`: Sizes the element proportionally to its parent using a `weight` on the main axis
-///   (width for horizontal stacks, height for vertical). By default, all elements share equal weight.
-///   The `crossAxisRatio` controls the size on the cross axis (height for horizontal, width for vertical),
-///   where `1` means full size and, for example, `0.5` means half the available space.
+/// - `fixed`: Uses an exact size value on the main axis (width for horizontal stacks, height for vertical).
+///   This size is not affected by the parent or other elements.
+/// - `weighted`: Shares the remaining space after all `fixed` sizes are applied.
+///   Each element with a weight will receive a portion proportional to its `size` value
+///   compared to the total weight of all such elements.
+/// - `relative`: Sizes the element as a fraction of the total parent size on the main axis.
+///   For example, `relative(size: 0.5)` in a vertical stack will make the view occupy half the parent height.
+/// - `copy`: Copies the size directly from the view’s current intrinsic or frame value,
+///   depending on context. Useful when layout should reflect the view's content or predefined frame.
 public enum StackElementSize {
     case fixed(size: CGFloat)
     case weighted(size: CGFloat)
     case relative(size: CGFloat)
+    case copy
 }
 
 
@@ -139,6 +144,8 @@ public struct StackLayout {
                 mainLength = sizePerWeight * weight
             case .relative(let ratio):
                 mainLength = parentMainAxisLength * ratio
+            case .copy:
+                mainLength = (direction == .horizontal) ? element.view.frame.width : element.view.frame.height
             }
             
             switch element.crosSize {
@@ -151,6 +158,8 @@ public struct StackLayout {
                 crossLength = parentCorssAxisLength
             case .relative(let ratio):
                 crossLength = parentCorssAxisLength * ratio
+            case .copy:
+                crossLength = (direction == .horizontal) ? element.view.frame.height : element.view.frame.width
             }
 
             let (x, y, width, height): (CGFloat, CGFloat, CGFloat, CGFloat)
