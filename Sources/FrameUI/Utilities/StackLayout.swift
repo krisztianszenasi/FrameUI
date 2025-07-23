@@ -1,0 +1,229 @@
+//
+//  StackLayout.swift
+//  IconCraft
+//
+//  Created by Krisztián Szénási on 2025. 07. 22..
+//
+
+import UIKit
+
+/// Specifies the direction of element flow in a stack layout.
+///
+/// Used by `StackLayout` to define whether elements are arranged
+/// horizontally or vertically.
+enum StackDirection {
+    case vertical
+    case horizontal
+}
+
+
+/// Defines the arrangement strategy for elements in a stack layout.
+///
+/// This enum is used by `StackLayout` to determine how its child elements are positioned.
+///
+/// The available options are inspired by grid systems in web development and
+/// arrangement patterns from Jetpack Compose on Android.
+/// For a conceptual reference, see the Jetpack Compose documentation:
+/// https://developer.android.com/reference/kotlin/androidx/compose/foundation/layout/Arrangement
+enum StackArrangement {
+    case start
+    case center
+    case end
+    case spaceBetween
+    case spaceAround
+    case spaceEvenly
+}
+
+
+/// Defines how an element should be sized within the stack layout.
+///
+/// - `fixed`: Uses fixed width and height values.
+/// - `relative`: Sizes the element proportionally to its parent using a `weight` on the main axis
+///   (width for horizontal stacks, height for vertical). By default, all elements share equal weight.
+///   The `crossAxisRatio` controls the size on the cross axis (height for horizontal, width for vertical),
+///   where `1` means full size and, for example, `0.5` means half the available space.
+enum StackElementSize {
+    case fixed(size: CGFloat)
+    case weighted(size: CGFloat)
+    case relative(size: CGFloat)
+}
+
+
+/// Defines the alignment of individual elements within the stack layout.
+///
+/// In a vertical stack:
+/// - `start` aligns to the top,
+/// - `center` aligns to the center,
+/// - `end` aligns to the bottom.
+///
+/// In a horizontal stack:
+/// - `start` aligns to the left,
+/// - `center` aligns to the center,
+/// - `end` aligns to the right.
+enum StackAlignment {
+    case start
+    case center
+    case end
+}
+
+
+/// Represents an element to be placed within the stack layout.
+///
+/// The `view` is the actual UIView to be arranged according to the rules
+/// defined by its associated enums (e.g., alignment and sizing).
+struct StackElement {    
+    var view: UIView
+    var alignment: StackAlignment = .center
+    var mainSize: StackElementSize = .weighted(size: 1)
+    var crosSize: StackElementSize = .relative(size: 1)
+    
+    static func makeFiller() -> StackElement {
+        return StackElement(view: UIView())
+    }
+    
+    static func makeGap(mainLength: CGFloat = 0, crossLength: CGFloat = 0) -> StackElement {
+        return StackElement(view: UIView(), mainSize: .fixed(size: mainLength), crosSize: .fixed(size: crossLength))
+    }
+    
+    static func makeSeparator(color: UIColor = .systemGray) -> StackElement {
+        let seperator = UIView()
+        seperator.backgroundColor = color
+        return StackElement(view: seperator, mainSize: .fixed(size: 1))
+    }
+}
+
+
+/// Arranges a list of views horizontally or vertically with customizable options.
+///
+/// See `StackElement` and its related enums for details on available configuration options.
+struct StackLayout {
+
+    static func layoutStackedSubviews(
+        elements: [StackElement],
+        in parent: UIView,
+        direction: StackDirection,
+        arrangement: StackArrangement = .spaceEvenly
+    ) {
+        let elements = insertSpacing(for: arrangement, into: elements)
+        let totalWeight = calculateTotalWeight(elements: elements)
+
+        
+        
+        let parentMainAxisLength = ((direction == .vertical) ? parent.frame.height : parent.frame.width)
+        let parentRemainingMainAxisLength = parentMainAxisLength - calculateTotalFixLength(elements: elements, direction: direction, parentMainLength: parentMainAxisLength)
+        let parentCorssAxisLength = (direction == .vertical) ? parent.frame.width : parent.frame.height
+        var offset: CGFloat = 0
+
+        for element in elements {
+            let (mainLength, crossLength): (CGFloat, CGFloat)
+
+            switch element.mainSize {
+            case .fixed(let size):
+                mainLength = size
+            case .weighted(let weight):
+                let sizePerWeight = parentRemainingMainAxisLength / totalWeight
+                mainLength = sizePerWeight * weight
+            case .relative(let ratio):
+                mainLength = parentMainAxisLength * ratio
+            }
+            
+            switch element.crosSize {
+            case .fixed(let size):
+                crossLength = size
+            case .weighted:
+                // weighted does not really make sense for cross axis
+                // since there will be only one element so no matter
+                // what it would fill the entire space
+                crossLength = parentCorssAxisLength
+            case .relative(let ratio):
+                crossLength = parentCorssAxisLength * ratio
+            }
+
+            let (x, y, width, height): (CGFloat, CGFloat, CGFloat, CGFloat)
+
+            switch direction {
+            case .vertical:
+                width = crossLength
+                height = mainLength
+                x = calculateOffset(alignment: element.alignment, childSize: width, parentSize: parent.frame.width)
+                y = offset
+                offset += height
+            case .horizontal:
+                width = mainLength
+                height = crossLength
+                x = offset
+                y = calculateOffset(alignment: element.alignment, childSize: height, parentSize: parent.frame.height)
+                offset += width
+            }
+
+            element.view.frame = CGRect(x: x, y: y, width: width, height: height)
+            parent.addSubview(element.view)
+        }
+    }
+
+    private static func calculateOffset(alignment: StackAlignment, childSize: CGFloat, parentSize: CGFloat) -> CGFloat {
+        switch alignment {
+        case .start: return 0
+        case .center: return (parentSize - childSize) / 2
+        case .end: return parentSize - childSize
+        }
+    }
+    
+    
+    /// Inserts filler elements between existing elements to occupy remaining space.
+    ///
+    /// If the array contains a relative-sized element, no fillers are added since that element
+    /// already consumes all available space.
+    ///
+    /// The layout behaves traditionally—see the array extensions for usage examples or the
+    ///  `StackArrangement` enum.
+    private static func insertSpacing(for arrangement: StackArrangement, into elements: [StackElement]) -> [StackElement]{
+        guard !elements.contains(where: {
+            if case .weighted = $0.mainSize { true } else { false }
+        }) else {
+            return elements
+        }
+        
+        switch arrangement {
+        case .start:
+            return elements + [StackElement.makeFiller()]
+        case .center:
+            return [StackElement.makeFiller()] + elements + [StackElement.makeFiller()]
+        case .end:
+            return [StackElement.makeFiller()] + elements
+        case .spaceBetween:
+            return elements.insertBetween{ StackElement.makeFiller() }
+        case .spaceAround:
+            return elements.insertArround{ StackElement.makeFiller() }
+        case .spaceEvenly:
+            return elements.insertEvenly{ StackElement.makeFiller() }
+        }
+    }
+    
+    /// Calculates the total weight of relative-sized elements.
+    ///
+    /// Fixed-size stack elements are ignored in this calculation. This allows fixed and relative-sized elements
+    /// to coexist. The space taken by fixed elements is excluded, and the remaining space is distributed
+    /// proportionally among the relative elements based on their weights.
+    private static func calculateTotalWeight(elements: [StackElement]) -> CGFloat {
+        return elements.reduce(0) { sum, element in
+            if case let .weighted(size: weight) = element.mainSize {
+                return sum + weight
+            } else {
+                return sum
+            }
+        }
+    }
+    
+    private static func calculateTotalFixLength(elements: [StackElement], direction: StackDirection, parentMainLength: CGFloat) -> CGFloat {
+        return elements.reduce(0) { sum, element in
+            if case let .fixed(size: length) = element.mainSize {
+                return sum + length
+            } else if case let .relative(size: ratio) = element.mainSize {
+                return sum + parentMainLength * ratio
+            } else {
+                return sum
+            }
+        }
+    }
+}
