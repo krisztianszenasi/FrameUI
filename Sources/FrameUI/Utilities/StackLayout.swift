@@ -16,6 +16,11 @@ public enum StackDirection {
     case horizontal
 }
 
+public enum RelativeAxis {
+    case currentAxis
+    case oppositeAxis
+}
+
 
 /// Defines the arrangement strategy for elements in a stack layout.
 ///
@@ -49,8 +54,12 @@ public enum StackArrangement {
 public enum StackElementSize {
     case fixed(size: CGFloat)
     case weighted(size: CGFloat)
-    case relative(size: CGFloat)
+    case _relative(size: CGFloat, axis: RelativeAxis)
     case copy
+    
+    public static func relative(size: CGFloat, to axis: RelativeAxis = .currentAxis) -> StackElementSize {
+        return ._relative(size: size, axis: axis)
+    }
 }
 
 
@@ -127,10 +136,16 @@ public struct StackLayout {
         let totalWeight = calculateTotalWeight(elements: elements)
 
         
-        
         let parentMainAxisLength = ((direction == .vertical) ? parent.frame.height : parent.frame.width)
-        let parentRemainingMainAxisLength = parentMainAxisLength - calculateTotalFixLength(elements: elements, direction: direction, parentMainLength: parentMainAxisLength)
         let parentCorssAxisLength = (direction == .vertical) ? parent.frame.width : parent.frame.height
+        
+        let parentRemainingMainAxisLength = parentMainAxisLength - calculateTotalFixLength(
+            elements: elements,
+            direction: direction,
+            parentMainLength: parentMainAxisLength,
+            parentCrossLength: parentCorssAxisLength
+        )
+        
         var offset: CGFloat = 0
 
         for element in elements {
@@ -142,8 +157,9 @@ public struct StackLayout {
             case .weighted(let weight):
                 let sizePerWeight = parentRemainingMainAxisLength / totalWeight
                 mainLength = sizePerWeight * weight
-            case .relative(let ratio):
-                mainLength = parentMainAxisLength * ratio
+            case ._relative(let ratio, let axis):
+                let axisLength = (axis == .currentAxis) ? parentMainAxisLength : parentCorssAxisLength
+                mainLength = axisLength * ratio
             case .copy:
                 mainLength = (direction == .horizontal) ? element.view.frame.width : element.view.frame.height
             }
@@ -156,8 +172,9 @@ public struct StackLayout {
                 // since there will be only one element so no matter
                 // what it would fill the entire space
                 crossLength = parentCorssAxisLength
-            case .relative(let ratio):
-                crossLength = parentCorssAxisLength * ratio
+            case ._relative(let ratio, let axis):
+                let axisLength = (axis == .currentAxis) ? parentCorssAxisLength : parentMainAxisLength
+                crossLength = axisLength * ratio
             case .copy:
                 crossLength = (direction == .horizontal) ? element.view.frame.height : element.view.frame.width
             }
@@ -237,12 +254,21 @@ public struct StackLayout {
         }
     }
     
-    private static func calculateTotalFixLength(elements: [StackElement], direction: StackDirection, parentMainLength: CGFloat) -> CGFloat {
+    private static func calculateTotalFixLength(
+        elements: [StackElement],
+        direction: StackDirection,
+        parentMainLength: CGFloat,
+        parentCrossLength: CGFloat
+    ) -> CGFloat {
         return elements.reduce(0) { sum, element in
             if case let .fixed(size: length) = element.mainSize {
                 return sum + length
-            } else if case let .relative(size: ratio) = element.mainSize {
-                return sum + parentMainLength * ratio
+            } else if case .copy = element.mainSize {
+                let copiedSize = (direction == .horizontal) ? element.view.frame.width : element.view.frame.height
+                return sum + copiedSize
+            }else if case let ._relative(size: ratio, axis: axis) = element.mainSize {
+                let axisLength = (axis == .currentAxis) ? parentMainLength : parentCrossLength
+                return sum + axisLength * ratio
             } else {
                 return sum
             }
