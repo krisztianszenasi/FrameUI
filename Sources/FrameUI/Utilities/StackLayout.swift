@@ -90,7 +90,8 @@ public struct StackElement {
     public var view: UIView
     public var alignment: StackAlignment
     public var mainSize: StackElementSize
-    public var crosSize: StackElementSize
+    public var crossSize: StackElementSize
+    public var isHidden: Bool = false
     
     public init(
         view: UIView,
@@ -101,7 +102,7 @@ public struct StackElement {
         self.view = view
         self.alignment = alignment
         self.mainSize = mainSize
-        self.crosSize = crosSize
+        self.crossSize = crosSize
     }
 
     public static func makeFiller() -> StackElement {
@@ -132,9 +133,8 @@ public struct StackLayout {
         direction: StackDirection,
         arrangement: StackArrangement = .spaceEvenly
     ) {
-        let elements = insertSpacing(for: arrangement, into: elements)
+        let elements = insertSpacing(for: arrangement, into: handleHiddenElements(elements: elements))
         let totalWeight = calculateTotalWeight(elements: elements)
-
         
         let parentMainAxisLength = ((direction == .vertical) ? parent.frame.height : parent.frame.width)
         let parentCorssAxisLength = (direction == .vertical) ? parent.frame.width : parent.frame.height
@@ -164,7 +164,7 @@ public struct StackLayout {
                 mainLength = (direction == .horizontal) ? element.view.frame.width : element.view.frame.height
             }
             
-            switch element.crosSize {
+            switch element.crossSize {
             case .fixed(let size):
                 crossLength = size
             case .weighted:
@@ -200,6 +200,24 @@ public struct StackLayout {
         }
     }
     
+    
+    /// Handle hidden elements.
+    ///
+    /// Hidden elements are filtered out from the list to exclude them from layout calculations.
+    /// Their `isHidden` property is also set to `true` to ensure they are not visible.
+    private static func handleHiddenElements(elements: [StackElement]) -> [StackElement] {
+        var updatedElements: [StackElement] = []
+        for element in elements {
+            if element.isHidden {
+                element.view.isHidden = true
+            } else {
+                element.view.isHidden = false
+                updatedElements.append(element)
+            }
+        }
+        return updatedElements
+    }
+    
     /// Computes the ideal size needed to fit the given elements.
     ///
     /// Recommended usage: first call this method to calculate the fitting size,
@@ -217,18 +235,20 @@ public struct StackLayout {
 
             switch element.mainSize {
             case .fixed(let size): main = size
-            case .weighted: main = 0 // you don’t know until the parent is known
-            case ._relative(let ratio, _): main = 0 // again, needs parent
             case .copy:
                 main = (direction == .vertical) ? element.view.frame.height : element.view.frame.width
+            // does not make sense for other sizes
+            default:
+                main = 0
             }
 
-            switch element.crosSize {
+            switch element.crossSize {
             case .fixed(let size): cross = size
-            case .weighted: cross = 0
-            case ._relative: cross = 0
             case .copy:
                 cross = (direction == .vertical) ? element.view.frame.width : element.view.frame.height
+            // does not make sense for other sizes
+            default:
+                cross = 0
             }
 
             totalMain += main
