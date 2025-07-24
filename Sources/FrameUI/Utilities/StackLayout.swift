@@ -102,7 +102,7 @@ public struct StackElement {
         self.view = view
         self.alignment = alignment
         self.mainSize = mainSize
-        self.crossSize = crosSize
+        self.crossSize = crossSize
     }
 
     public static func makeFiller() -> StackElement {
@@ -110,7 +110,7 @@ public struct StackElement {
     }
     
     public static func makeGap(mainLength: CGFloat = 0, crossLength: CGFloat = 0) -> StackElement {
-        return StackElement(view: UIView(), mainSize: .fixed(size: mainLength), crosSize: .fixed(size: crossLength))
+        return StackElement(view: UIView(), mainSize: .fixed(size: mainLength), crossSize: .fixed(size: crossLength))
     }
     
     public static func makeSeparator(color: UIColor = .systemGray) -> StackElement {
