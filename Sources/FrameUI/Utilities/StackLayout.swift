@@ -97,7 +97,7 @@ public struct StackElement {
         view: UIView,
         alignment: StackAlignment = .center,
         mainSize: StackElementSize = .weighted(size: 1),
-        crosSize: StackElementSize = .relative(size: 1)
+        crossSize: StackElementSize = .relative(size: 1)
     ) {
         self.view = view
         self.alignment = alignment
