@@ -102,7 +102,7 @@ public struct StackElement {
         self.view = view
         self.alignment = alignment
         self.mainSize = mainSize
-        self.crossSize = crosSize
+        self.crossSize = crossSize
     }
 
     public static func makeFiller() -> StackElement {
