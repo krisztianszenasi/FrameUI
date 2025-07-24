@@ -227,11 +227,15 @@ public struct StackLayout {
     /// and finally apply the returned size to the parent’s frame.
     public static func calculateFittingSize(
         for elements: [StackElement],
+        parentSize: CGRect,
         direction: StackDirection
     ) -> CGSize {
         let elements = handleHiddenElements(elements: elements)
         var totalMain: CGFloat = 0
         var maxCross: CGFloat = 0
+        
+        let parentMainSize = (direction == .horizontal) ? parentSize.width : parentSize.height
+        let parentCrossSize = (direction == .vertical) ? parentSize.height : parentSize.width
 
         for element in elements {
             let (main, cross): (CGFloat, CGFloat)
@@ -240,7 +244,9 @@ public struct StackLayout {
             case .fixed(let size): main = size
             case .copy:
                 main = (direction == .vertical) ? element.view.frame.height : element.view.frame.width
-            // does not make sense for other sizes
+            case ._relative(size: let ratio, axis: let relativeAxis):
+                let axisSize = (relativeAxis == .currentAxis) ? parentMainSize : parentCrossSize
+                main = axisSize * ratio
             default:
                 main = 0
             }
@@ -249,6 +255,9 @@ public struct StackLayout {
             case .fixed(let size): cross = size
             case .copy:
                 cross = (direction == .vertical) ? element.view.frame.width : element.view.frame.height
+            case ._relative(size: let ratio, axis: let relativeAxis):
+                let axisSize = (relativeAxis == .currentAxis) ? parentCrossSize : parentMainSize
+                cross = axisSize * ratio
             // does not make sense for other sizes
             default:
                 cross = 0
