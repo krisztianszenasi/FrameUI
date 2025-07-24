@@ -227,6 +227,7 @@ public struct StackLayout {
         for elements: [StackElement],
         direction: StackDirection
     ) -> CGSize {
+        let elements = handleHiddenElements(elements: elements)
         var totalMain: CGFloat = 0
         var maxCross: CGFloat = 0
 
