@@ -10,6 +10,13 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.6.1] - 2025-07-25
+
+### Fixed
+- Resolved a redefinition issue where the `StackLayout` struct reappeared due to an unintended merge.
+
+---
+
 ## [0.6.0] - 2025-07-25
 
 ### Added
