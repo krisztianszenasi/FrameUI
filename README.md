@@ -1,6 +1,8 @@
 
 # FrameUI
 
+![version](https://img.shields.io/badge/version-0.6.0-blue.svg)
+
 FrameUI is a lightweight UI framework built on UIKit that uses manual frame-based layout instead of Auto Layout or SwiftUI. 
 
 ## About the Project
@@ -8,10 +10,6 @@ FrameUI is a lightweight UI framework built on UIKit that uses manual frame-base
 This project originated as a take-home assignment for an iOS developer role where manual layout and frame setting were specifically requested. After some frustration with managing frames directly, I developed FrameUI to make manual layout more manageable and expressive.
 
 At this point, FrameUI should be considered **beta** software. The API and features may change significantly, including breaking changes, as development continues (if it continues). Use it with caution in production projects.
-
-## Current Version
-
-![version](https://img.shields.io/badge/version-0.6.0-blue.svg)
 
 ---
 
