@@ -91,20 +91,18 @@ public struct StackElement {
     public var alignment: StackAlignment
     public var mainSize: StackElementSize
     public var crossSize: StackElementSize
-    public var isHidden: Bool
+    public var isHidden: Bool = false
     
     public init(
         view: UIView,
         alignment: StackAlignment = .center,
         mainSize: StackElementSize = .weighted(size: 1),
-        crossSize: StackElementSize = .relative(size: 1),
-        isHidden: Bool = false
+        crossSize: StackElementSize = .relative(size: 1)
     ) {
         self.view = view
         self.alignment = alignment
         self.mainSize = mainSize
         self.crossSize = crossSize
-        self.isHidden = isHidden
     }
 
     public static func makeFiller() -> StackElement {
