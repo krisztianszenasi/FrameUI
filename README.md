@@ -11,13 +11,10 @@ This project originated as a take-home assignment for an iOS developer role wher
 
 At this point, FrameUI should be considered **beta** software. The API and features may change significantly, including breaking changes, as development continues (if it continues). Use it with caution in production projects.
 
----
 
 ## Features
 
 At present, the primary supported element is `FUIStackView`, inspired by web-based flexbox layouts and Android Jetpack Compose.
-
----
 
 ## Installation
 
