@@ -189,9 +189,8 @@ public class FUIStackView: UIView {
         switch element.crossSize {
         case .fixed(size: let size):
             return size
-        case .weighted(size: let weight):
-            let sizePerWeight = remainingLength / totalWeight
-            return weight * sizePerWeight
+        case .weighted:
+            return frame.width
         case ._relative(size: let ratio, axis: let axis):
             let axisSize = (axis == .currentAxis) ? frame.getCrossSize(for: direction) : frame.getMainSize(for: direction)
             return ratio * axisSize

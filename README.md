@@ -1,7 +1,7 @@
 
 # FrameUI
 
-![version](https://img.shields.io/badge/version-0.6.1-blue.svg)
+![version](https://img.shields.io/badge/version-0.6.2-blue.svg)
 
 FrameUI is a lightweight UI framework built on UIKit that uses manual frame-based layout instead of Auto Layout or SwiftUI. 
 
@@ -14,7 +14,7 @@ At this point, FrameUI should be considered **beta** software. The API and featu
 
 ## Features
 
-At present, the primary supported element is `FUIStackView`, inspired by web-based flexbox layouts and Android Jetpack Compose.
+Currently, the primary supported layout components are `FUIStackView` and `FUIBoxView`, drawing inspiration from web-based flexbox layouts and Android Jetpack Compose.
 
 ## Installation
 
