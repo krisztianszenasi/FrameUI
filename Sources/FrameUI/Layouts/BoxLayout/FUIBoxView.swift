@@ -53,7 +53,7 @@ public class FUIBoxView: UIView {
         for element in visibleElements {
             let width = calculateWidth(for: element)
             let height = calculateHeight(for: element)
-            let point = calculatePoint(for: element)
+            let point = calculatePoint(for: element, elementWidth: width, elementHeight: height)
             element.view.frame = CGRect(x: point.x, y: point.y, width: width, height: height)
         }
     }
@@ -92,14 +92,14 @@ public class FUIBoxView: UIView {
         }
     }
     
-    private func calculatePoint(for element: BoxElement) -> CGPoint{
+    private func calculatePoint(for element: BoxElement, elementWidth: CGFloat, elementHeight: CGFloat) -> CGPoint{
         let startX: CGFloat = 0
-        let centerX: CGFloat = (frame.width / 2) - (element.view.frame.width / 2)
-        let endX: CGFloat = frame.width - element.view.frame.width
+        let centerX: CGFloat = (frame.width / 2) - (elementWidth / 2)
+        let endX: CGFloat = frame.width - elementWidth
         
         let startY: CGFloat = 0
-        let centerY: CGFloat = (frame.height / 2) - (element.view.frame.height / 2)
-        let endY: CGFloat = frame.height - element.view.frame.height
+        let centerY: CGFloat = (frame.height / 2) - (elementHeight / 2)
+        let endY: CGFloat = frame.height - elementHeight
         
         switch element.alignment ?? alignment {
         case .topStart:
